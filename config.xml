@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <widget xmlns = "http://www.w3.org/ns/widgets"
+        xmlns:gap = "http://phonegap.com/ns/1.0"
+        id        = "com.phonegap.kitchensink"
+        version   = "0.1.0">
+		
+	<preference name="phonegap-version" value="1.4.1" />
+
+    <name>Photo Contact</name>
+
+    <description>
+        Simple mobile app to take photo and record simple user contact info
+    </description>
+
+    <author href="http://www.yusah.com" email="developer@yusah.com">
+        Milton Lai
+    </author>
+
+	<!-- the default attribute can also be used -->
+	<icon src="icons/Icon57.png" />
+
+	<gap:splash src="splashes/Default.png" />
+	<feature name="http://api.phonegap.com/1.0/camera"/>
+	<feature name="http://api.phonegap.com/1.0/file"/>
+	<feature name="http://api.phonegap.com/1.0/network"/>
+	<feature name="http://api.phonegap.com/1.0/notification"/>
+</widget>

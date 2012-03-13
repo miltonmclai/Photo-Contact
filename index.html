@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Photo Contact</title>
+
+    <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    // Wait for PhoneGap to connect with the device
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    // PhoneGap is ready to be used!
+    //
+    function onDeviceReady() {
+        // Init
+    }
+
+    // Called if Command successfull executed
+    //
+    //function onSuccess(someObject) {
+    //  console.log(someObject);
+    //}
+
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+    }
+
+    </script>
+  </head>
+  <body>
+    <h1>Photo Contact</h1>
+    <p>Simple mobile app to take photo and record simple user contact info</p>
+  </body>
+</html>
