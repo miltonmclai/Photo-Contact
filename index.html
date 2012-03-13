@@ -1,16 +1,61 @@
 <!DOCTYPE html>
 <html>
-  <head>
+    <head>
     <title>Photo Contact</title>
-
     <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+    <link rel="stylesheet" href="jquery.mobile-1.0.1.min.css" /> 
+    <script src="jquery-1.7.1.min.js"></script> 
+    <script src="jquery.mobile-1.0.1.min.js"></script>
+    <style>
+			.photoPreview {
+				width: 220px;
+				height: 220px;
+				margin: 10px auto;
+				border: 1px solid #999;
+				border-radius: 10px;
+				position: relative;
+			}
+			.photoPreview .ui-btn {
+				display: block;
+				position: absolute;
+				width: 80%;
+				top: 40%;
+				left: 10%;
+			}
+			#photoPreview {
+				width: 200px;
+				height: 200px;
+				margin: 9px;
+				border: 1px solid #999;
+			}
+		</style>
     <script type="text/javascript" charset="utf-8">
-    // Wait for PhoneGap to connect with the device
-    //
-    document.addEventListener("deviceready",onDeviceReady,false);
+		$(function() {
+		
+			$('#photoButton').click(function() {
+				alert('Take Photo');
+				// Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
+				navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 75, allowEdit: true, 
+						destinationType : Camera.DestinationType.FILE_URI, 
+						sourceType : Camera.PictureSourceType.CAMERA, 
+						encodingType: Camera.EncodingType.JPEG,
+						targetWidth: 200,
+						targetHeight: 200 }); 
+			});
+			
+			function onPhotoURISuccess(imageURI) {
+				// Uncomment to view the image file URI 
+				console.log(imageURI);
+				// Get image handle
+				$("#previewPhoto").attr("src", imageURI);
+			}
+			
+			// Wait for PhoneGap to connect with the device
+			document.addEventListener("deviceready",onDeviceReady,false);
+
+		});
 
     // PhoneGap is ready to be used!
-    //
     function onDeviceReady() {
         // Init
     }
@@ -28,9 +73,38 @@
     }
 
     </script>
-  </head>
-  <body>
-    <h1>Photo Contact</h1>
-    <p>Simple mobile app to take photo and record simple user contact info</p>
-  </body>
+    </head>
+    <body>
+      <div data-role="page" id="home">
+        <div data-role="header">
+          <h1>Photo Contact</h1>
+        </div>
+        <div data-role="content">
+          <p>Simple mobile app to take photo and record simple user contact info</p>
+          <p><a href="#newContact" data-role="button">New Contact</a></p>
+          <p><a href="#manageContact" data-role="button">Manage Contact</a></p>
+        </div>
+      </div>
+      <div data-role="page" data-add-back-btn="true" id="newContact">
+        <div data-role="header" data-position="fixed">
+          <h1>New Contact</h1>
+          <div class="ui-body ui-body-b">
+          			<div class="photoPreview"><img id="photoPreview" src="" /><button type="button" id="photoButton">Take Photo</button></div>
+                <input type="text" name="name" id="nameBox" value="" placeholder="Name" />
+                <input type="text" name="email" id="emailBox" value="" placeholder="Email" />
+                <input type="text" name="phone" id="phoneBox" value="" placeholder="Phone" />
+                <button type="submit" id="saveButton">Save Contact</button>
+          </div>
+      	</div>
+        <div data-role="content"></div>
+      </div>
+      <div data-role="page" data-add-back-btn="true" id="manageContact">
+        <div data-role="header">
+          <h1>Manage Contact</h1>
+        </div>
+        <div data-role="content">
+           <ul data-role="listview" id="list"></ul>
+        </div>
+      </div>
+		</body>
 </html>
