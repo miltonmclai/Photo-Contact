@@ -66,33 +66,16 @@
 		$(function() {
         // Init
 				
-			$.fn.preventUglyScroll = function(){
-			
-					var node = this[0];
-					console.log(node);
-					
-					node.ontouchmove = function(event){
-							var page = $('.ui-page-active');
-							
-							// block all two finger gestures
-							if(event.touches.length > 1) {
-									console.log('ontouchmove 2 fingers preventDefault');
-									event.preventDefault();
-									return false;
-							}
-							
-							var yDiff     = event.pageY - touchStart.pageY;
-							var newTop  = yDiff + frameStart;
-							var hMin     = window.innerHeight - page.height();
-							if(newTop <= 0 && newTop > hMin) {
-									$(node).css('margin-top', newTop);
-							}
-							if (hMin >= 0) {
-								event.preventDefault();
-							}
-							console.log('ontouchmove yDiff:' + yDiff + ' newTop:' + newTop + ' hMin:' + hMin + ' window.innerHeight:' + window.innerHeight + ' $(node).height():' + $(node).height() + ' page.height():' + page.height());
-					}
-			}
+			document.addEventListener('touchmove', function(ev){
+				var docH = $('document').height();
+				var winH = $('document').height();
+				var winInnH = $('document').height();
+				var aPageH = $('document').height();
+				console.log('docH : ' + docH + ' | winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
+				if (winInnH > aPageH) {
+					ev.preventDefault(); 
+				}
+			}); 
 				
 			var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 			db.transaction(populateDB, onFail);
@@ -127,7 +110,7 @@
 				// Get image handle
 				$("#photoPreview").attr("src", imageURI).show();
 				$("#photoButton").hide();
-				$("#photoBox").val('imageURI');
+				$("#photoBox").val(imageURI);
 			}
 			
 			// Save Contact to DB
@@ -285,7 +268,6 @@
 			// PhoneGap is ready to be used!
 			function onDeviceReady() {
 					// Init
-					$('body').preventUglyScroll();
 					
 					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 					db.transaction(populateDB, onFail);
@@ -330,9 +312,55 @@
 			// File Example\
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
+				readData('README', function(evt) {
+						console.log("Read as text");
+						console.log(evt.target.result);
+						$('#homeMsg').append($('<p />', {html:evt.target.result}));
+				});
 			});
 			
+			var writeData = function (filename, data, callback) {
+				var writeOutData = function () {
+					var fw = new FileWriter();
+					fw.oncomplete = callback;
+					fw.onerror = function () { 
+						alert("Failed to save update");
+					}
+					fw.writeAsText("./" + filename, data);
+				}
+				
+				navigator.fileMgr.testDirectoryExists(".", function(exists) {
+						exists ? writeOutData() :
+						navigator.fileMgr.createDirectory(".", writeOutData, function() {
+							alert("Failed to save update");
+						})
+				});
+			};
+			
+			var readData = function (filename, callback) {
+				var filePath = "./" + filename;
+				
+				var readInData = function () {
+					var fr = new FileReader();
+					fr.onload = function (data) {
+						callback(data);
+					};
+					fr.readAsText(filePath);
+				}		
+				
+				navigator.fileMgr.testFileExists(filePath, function(exists) {
+					exists ? readInData() : alert("file doesn't exist");
+				});
+			}
+	
+			
+
+    function onFileSystemSuccess(fileSystem) {
+        console.log(fileSystem.name);
+        console.log(fileSystem.root.name);
+    }
+		
 			function gotFS(fileSystem) {
 				console.log("gotFS: Start");
 				fileSystem.root.getFile("README", null, gotFileEntry, fail);
