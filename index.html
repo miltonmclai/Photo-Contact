@@ -70,35 +70,27 @@
 			
 					var node = this[0];
 					console.log(node);
-			
-					node.ontouchstart = function(event) {
-							touchStart = event;
-							frameStart = $(node).offset().top;
-							console.log('ontouchstart top:' + $(node).offset().top);
-					}
 					
 					node.ontouchmove = function(event){
-
+							var page = $('.ui-page-active');
+							
 							// block all two finger gestures
 							if(event.touches.length > 1) {
 									console.log('ontouchmove 2 fingers preventDefault');
 									event.preventDefault();
 									return false;
 							}
-
-							event.preventDefault();
 							
 							var yDiff     = event.pageY - touchStart.pageY;
 							var newTop  = yDiff + frameStart;
-							var hMin     = window.innerHeight - $(node).height();
+							var hMin     = window.innerHeight - page.height();
 							if(newTop <= 0 && newTop > hMin) {
 									$(node).css('margin-top', newTop);
 							}
-							console.log('ontouchmove yDiff:' + yDiff);
-							console.log('ontouchmove newTop:' + newTop);
-							console.log('ontouchmove hMin:' + hMin);
-							console.log('ontouchmove window.innerHeight:' + window.innerHeight);
-							console.log('ontouchmove $(node).height():' + $(node).height());
+							if (hMin >= 0) {
+								event.preventDefault();
+							}
+							console.log('ontouchmove yDiff:' + yDiff + ' newTop:' + newTop + ' hMin:' + hMin + ' window.innerHeight:' + window.innerHeight + ' $(node).height():' + $(node).height() + ' page.height():' + page.height());
 					}
 			}
 				
@@ -293,7 +285,7 @@
 			// PhoneGap is ready to be used!
 			function onDeviceReady() {
 					// Init
-					$('#wrapper').preventUglyScroll();
+					$('body').preventUglyScroll();
 					
 					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 					db.transaction(populateDB, onFail);
@@ -342,40 +334,45 @@
 			});
 			
 			function gotFS(fileSystem) {
-					fileSystem.root.getFile("README", null, gotFileEntry, fail);
+				console.log("gotFS: Start");
+				fileSystem.root.getFile("README", null, gotFileEntry, fail);
 			}
 	
 			function gotFileEntry(fileEntry) {
-					fileEntry.file(gotFile, fail);
+				console.log("gotFileEntry: Start");
+				fileEntry.file(gotFile, fail);
 			}
 	
 			function gotFile(file){
-					readDataUrl(file);
-					readAsText(file);
+				console.log("gotFile: Start");
+				readDataUrl(file);
+				readAsText(file);
 			}
 	
 			function readDataUrl(file) {
-					var reader = new FileReader();
-					reader.onloadend = function(evt) {
-							console.log("Read as data URL");
-							console.log(evt.target.result);
-							$('#homeMsg').append($('<p />', {html:evt.target.result}));
-					};
-					reader.readAsDataURL(file);
+				console.log("readDataUrl: Start");
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+						console.log("Read as data URL");
+						console.log(evt.target.result);
+						$('#homeMsg').append($('<p />', {html:evt.target.result}));
+				};
+				reader.readAsDataURL(file);
 			}
 	
 			function readAsText(file) {
-					var reader = new FileReader();
-					reader.onloadend = function(evt) {
-							console.log("Read as text");
-							console.log(evt.target.result);
-							$('#homeMsg').append($('<p />', {html:evt.target.result}));
-					};
-					reader.readAsText(file);
+				console.log("readAsText: Start");
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+						console.log("Read as text");
+						console.log(evt.target.result);
+						$('#homeMsg').append($('<p />', {html:evt.target.result}));
+				};
+				reader.readAsText(file);
 			}
 	
 			function fail(evt) {
-					console.log(evt.target.error.code);
+				console.log(evt.target.error.code);
 			}
 	
 			// Called if Command successfull executed
