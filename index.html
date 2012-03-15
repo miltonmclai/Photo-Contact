@@ -8,6 +8,13 @@
     <script src="jquery.mobile-1.0.1.min.js"></script>
     <script src="jquery.validate-1.9.0.min.js"></script>
     <style>
+			#homeMsg {
+				min-height: 36px;
+				padding: 20px;
+				text-align: center;
+				color: #09F;
+				font-weight: bold;
+			}
 			.photoPreview {
 				width: 220px;
 				height: 220px;
@@ -58,8 +65,37 @@
     <script type="text/javascript" charset="utf-8">
 		$(function() {
         // Init
-				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-				db.transaction(populateDB, onFail);
+				
+			$.fn.preventUglyScroll = function(){
+			
+					var node = this[0];
+			
+					node.ontouchstart = function(event) {
+							touchStart = event;
+							frameStart = $(node).offset().top;
+					}
+					
+					node.ontouchmove = function(event){
+
+							// block all two finger gestures
+							if(event.touches.length > 1) {
+									event.preventDefault();
+									return false;
+							}
+
+							event.preventDefault();
+							
+							var yDiff     = event.pageY - touchStart.pageY;
+							var newTop  = yDiff + frameStart;
+							var hMin     = 460 - $(node).height();
+							if(newTop <= 0 && newTop > hMin) {
+									$(node).css('margin-top', newTop);
+							}
+					}
+			}
+				
+			var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+			db.transaction(populateDB, onFail);
 			
 			/*
 			 * New Contact Page Functions
@@ -76,9 +112,6 @@
 						targetHeight: 200 }); 
 			});
 			
-			//$("#nameBox").tipTip({activation:"focus",defaultPosition:"top",content:"test Name"});
-			//$("#emailBox").tipTip({activation:"focus",defaultPosition:"top",content:"test Email"});
-			
 			$('#contactForm').validate({
 				rules: {
 					contactName: {required:true},
@@ -94,6 +127,7 @@
 				// Get image handle
 				$("#photoPreview").attr("src", imageURI).show();
 				$("#photoButton").hide();
+				$("#photoBox").val('imageURI');
 			}
 			
 			// Save Contact to DB
@@ -107,12 +141,19 @@
 						$('#phoneBox').val(),
 						$('#photoBox').val()
 						], {}, onFail);
-				}, onFail, onSuccess);
+				}, onFail, onSaveSuccess);
 			}
 			
-			var validateContact = function() {
-				
+			var onSaveSuccess = function() {
+				$("#contactForm input").val('');
+				$('#homeMsg').html('Contact saved.');
+				$.mobile.changePage("#home");
 			}
+			
+			// validate Contact Form - Taken care by jQuery.validation
+/*			var validateContact = function() {
+				
+			}*/
 			
 			/*
 			 * Manage Contact Page Functions
@@ -159,6 +200,9 @@
 							})).append(
 							$('<p />', {
 								html: result.contactPhone
+							})).append(
+							$('<p />', {
+								html: result.contactPhoto
 							}));
 						
 						// Create List Item
@@ -171,7 +215,7 @@
 									class: 'delete'
 								}).on('click', {}, function(e) {
 									var cid = $(this).attr('href').substring(2)
-									var confirmDelete = confirm("Delete contact CID: " + cid + "?");
+									var confirmDelete = confirm("Are you sure you want to delete this contact?");
 									if (confirmDelete) {
 										console.log('Delete CID: '+cid);
 										db.transaction(function(tx) {
@@ -214,16 +258,19 @@
 			}
 			
 			$('#clearContact').on('click', function(e) {
-				db.transaction(function(tx){
-					tx.executeSql('DROP TABLE IF EXISTS contact');
-					tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
-				}, onFail, onClearSuccess);
+				var confirmClear = confirm("Are you sure you want to clear all contacts?");
+				if (confirmClear) {
+					db.transaction(function(tx){
+						tx.executeSql('DROP TABLE IF EXISTS contact');
+						tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
+					}, onFail, onClearSuccess);
+				}
 			});
 			
 			var onClearSuccess = function(tx, results) {
 				$('#contactList').html("");
-				$('#contactListEmpty').show();
-				$('#contactListWrapper').hide();
+				$('#homeMsg').html('All contacts cleared!');
+				$.mobile.changePage("#home");
 			}
 			
 			// Upload Contact
@@ -239,15 +286,16 @@
     // PhoneGap is ready to be used!
     function onDeviceReady() {
         // Init
+				$('#wrapper').preventUglyScroll();
+				
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(populateDB, onFail);
+				
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
     }
 		
 		function populateDB(tx) {
-			//tx.executeSql('DROP TABLE IF EXISTS contact');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
-			//tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES ("Name 1", "Email 1", "Phone 1", "Photo 1")', [], querySuccess, onFail);
-			//tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES ("Name 2", "Email 2", "Phone 2", "Photo 2")', [], querySuccess, onFail);
 		}
 
     // Transaction success callback
@@ -279,18 +327,52 @@
         }
 			}
     }
+		
+		// File Example
+
+    function gotFS(fileSystem) {
+        fileSystem.root.getFile("README", null, gotFileEntry, fail);
+    }
+
+    function gotFileEntry(fileEntry) {
+        fileEntry.file(gotFile, fail);
+    }
+
+    function gotFile(file){
+        readDataUrl(file);
+        readAsText(file);
+    }
+
+    function readDataUrl(file) {
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+            console.log("Read as data URL");
+            console.log(evt.target.result);
+						$('#homeMsg').append($('<p />', {html:evt.target.result}));
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function readAsText(file) {
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+            console.log("Read as text");
+            console.log(evt.target.result);
+						$('#homeMsg').append($('<p />', {html:evt.target.result}));
+        };
+        reader.readAsText(file);
+    }
+
+    function fail(evt) {
+        console.log(evt.target.error.code);
+    }
 
     // Called if Command successfull executed
-    //
-    //function onSuccess(someObject) {
-    //  console.log(someObject);
-    //}
 		function onSuccess() {
-    	alert("success!");
+    	alert("Success!");
 		}
 
     // Called if something bad happens.
-    // 
     function onFail(message) {
       alert('Failed because: ' + message);
     }
@@ -298,12 +380,14 @@
     </script>
     </head>
     <body>
+    <div id="wrapper">
       <div data-role="page" id="home">
         <div data-role="header">
           <h1>Photo Contact</h1>
         </div>
         <div data-role="content">
           <p style="text-align:center;">Simple mobile app to take photo and record simple user contact info</p>
+          <div id="homeMsg"></div>
           <p><a href="#newContact" data-role="button" data-icon="plus">New Contact</a></p>
           <p><a href="#manageContact" data-role="button" data-icon="grid">Manage Contact</a></p>
         </div>
@@ -315,7 +399,7 @@
         <div data-role="content">
           <div class="ui-body ui-body-b">
           	<form id="contactForm" action="" method="post">
-            <input name="contactPhoto" id="photoBox" type="hidden" value="randomPhotoPath" />
+            <input name="contactPhoto" id="photoBox" type="hidden" value="" />
             <div class="photoPreview"><img id="photoPreview" src="" /><div id="photoButton">Take a Photo</div></div>
             <div id="nameDiv" data-role="fieldcontain">
             	<label for="contactName">Name*</label> <input type="text" name="contactName" id="nameBox" value="" />
@@ -334,7 +418,7 @@
       <div data-role="page" data-add-back-btn="true" id="manageContact">
         <div data-role="header">
           <h1>Manage Contact</h1>
-					<a id="clearContact" href="#" data-icon="delete" class="ui-btn-right">Clear All Contacts</a>
+					<a id="clearContact" href="#" data-icon="delete" class="ui-btn-right">Clear ALL</a>
         </div>
         <div data-role="content">
 	        <p id="contactListEmpty" style="text-align:center;">The contact list is empty</p>
@@ -343,5 +427,6 @@
           </div>
         </div>
       </div>
+    </div>
 		</body>
 </html>
