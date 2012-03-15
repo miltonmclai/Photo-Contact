@@ -67,11 +67,10 @@
         // Init
 				
 			document.addEventListener('touchmove', function(ev){
-				var docH = $('document').height();
-				var winH = $('document').height();
-				var winInnH = $('document').height();
-				var aPageH = $('document').height();
-				console.log('docH : ' + docH + ' | winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
+				var winH = $('window').height();
+				var winInnH = $('window').height();
+				var aPageH = $('.ui-page-active').height();
+				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
 				if (winInnH > aPageH) {
 					ev.preventDefault(); 
 				}
@@ -83,6 +82,11 @@
 			/*
 			 * New Contact Page Functions
 			 */
+			$('#newContact').on('pageshow', function(e, ui) {
+				$("#photoPreview").hide();
+				$("#photoButton").show();
+				$("#contactForm input").val('');
+			});
 			
 			$('#photoButton').click(function() {
 				//alert('Take Photo');
@@ -356,10 +360,24 @@
 	
 			
 
-    function onFileSystemSuccess(fileSystem) {
-        console.log(fileSystem.name);
-        console.log(fileSystem.root.name);
-    }
+			function onFileSystemSuccess(fileSystem) {
+					console.log('fileSystem.name: '+fileSystem.name);
+					console.log('fileSystem.root.name: '+fileSystem.root.name);
+					console.log('fileSystem.root.fullPath: '+fileSystem.root.fullPath);
+					console.log('fileSystem.root.name: '+fileSystem.root.name);
+					
+					var directoryReader = fileSystem.root.createReader();
+	
+					// Get a list of all the entries in the directory
+					directoryReader.readEntries(readDirSuccess,fail);
+			}
+			
+			function readDirSuccess(entries) {
+					var i;
+					for (i=0; i<entries.length; i++) {
+							console.log(entries[i].name);
+					}
+			}
 		
 			function gotFS(fileSystem) {
 				console.log("gotFS: Start");
