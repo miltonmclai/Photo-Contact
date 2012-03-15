@@ -64,301 +64,47 @@
 		</style>
     <script type="text/javascript" charset="utf-8">
 		$(function() {
-        // Init
+			/*
+			 * Homepage Functions
+			 */
 				
 			document.addEventListener('touchmove', function(ev){
-				var winH = $('window').height();
-				var winInnH = $('window').height();
+				var winH = $(window).height();
+				var winInnH = $(window).innerHeight();
 				var aPageH = $('.ui-page-active').height();
 				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
 				if (winInnH > aPageH) {
 					ev.preventDefault(); 
 				}
-			}); 
-				
-			var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-			db.transaction(populateDB, onFail);
-			
-			/*
-			 * New Contact Page Functions
-			 */
-			$('#newContact').on('pageshow', function(e, ui) {
-				$("#photoPreview").hide();
-				$("#photoButton").show();
-				$("#contactForm input").val('');
 			});
-			
-			$('#photoButton').click(function() {
-				//alert('Take Photo');
-				// Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
-				navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 75, allowEdit: true, 
-						destinationType : Camera.DestinationType.FILE_URI, 
-						sourceType : Camera.PictureSourceType.CAMERA, 
-						encodingType: Camera.EncodingType.JPEG,
-						targetWidth: 200,
-						targetHeight: 200 }); 
-			});
-			
-			$('#contactForm').validate({
-				rules: {
-					contactName: {required:true},
-					contactEmail: {required:true,email:true},
-					contactPhone: {required:true,digits:true}
-				},
-   			submitHandler: function() { onSave() }
-			});
-			
-			var onPhotoURISuccess = function(imageURI) {
-				// Uncomment to view the image file URI 
-				console.log(imageURI);
-				// Get image handle
-				$("#photoPreview").attr("src", imageURI).show();
-				$("#photoButton").hide();
-				$("#photoBox").val(imageURI);
-			}
-			
-			// Save Contact to DB
-			var onSave = function() {
-        // Init
-				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-				db.transaction(function(tx) {
-					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
-						$('#nameBox').val(),
-						$('#emailBox').val(),
-						$('#phoneBox').val(),
-						$('#photoBox').val()
-						], {}, onFail);
-				}, onFail, onSaveSuccess);
-			}
-			
-			var onSaveSuccess = function() {
-				$("#contactForm input").val('');
-				$('#homeMsg').html('Contact saved.');
-				$.mobile.changePage("#home");
-			}
-			
-			// validate Contact Form - Taken care by jQuery.validation
-/*			var validateContact = function() {
-				
-			}*/
-			
-			/*
-			 * Manage Contact Page Functions
-			 */
-			
-			// Read DB
-			$('#manageContact').on('pageshow', function(e, ui) {
-				db.transaction(readDB, onFail);
-			});
-				
-			$('#manageContact').on('pagebeforehide', function(e, ui) {
-				$('#contactListEmpty').hide();
-				$('#contactListWrapper').hide();
-			});
-			 
-			var readDB = function(tx) {
-        tx.executeSql('SELECT * FROM contact', [], listContact, onFail);
-			}
-			
-			// List Contact List
-			var listContact = function(tx, results) {
-				var list = $('#contactList');
-				var anchorObj;
-  			list.html("");
-				
-				var len = results.rows.length;
-				var result;
-				console.log("Result Rows = " + len);
-				if (len > 0) {
-					$('#contactListEmpty').hide();
-					$('#contactListWrapper').show();
-					for (var i=0; i<len; i++){
-						result = results.rows.item(i);
-						// Create List Item Anchor Obj
-						anchorObj = $('<a />', {name: '#'}).append(
-							$('<img />', {
-								src: 'icons/Icon512.png'
-							})).append(
-							$('<h1 />', {
-								html: result.contactName
-							})).append(
-							$('<p />', {
-								html: result.contactEmail
-							})).append(
-							$('<p />', {
-								html: result.contactPhone
-							})).append(
-							$('<p />', {
-								html: result.contactPhoto
-							}));
-						
-						// Create List Item
-						list.append(
-							$('<li />', {id: 'C'+result.id}).append(anchorObj).append(
-		
-								/** BEGIN - Remove Contact Split Button **/
-								$('<a />', {
-									href: '#C'+result.id,
-									class: 'delete'
-								}).on('click', {}, function(e) {
-									var cid = $(this).attr('href').substring(2)
-									var confirmDelete = confirm("Are you sure you want to delete this contact?");
-									if (confirmDelete) {
-										console.log('Delete CID: '+cid);
-										db.transaction(function(tx) {
-											tx.executeSql('SELECT * FROM contact WHERE id=?', [cid], function(tx, results)
-											{
-												var len = results.rows.length;
-												if (len > 0) {
-													var photoPath = results.rows.item(0).contactPhoto;
-													tx.executeSql('DELETE FROM contact WHERE id=?', [cid], function(tx, results)
-													{
-														$('#C'+cid).remove();
-														list.listview('refresh');
-														// Delete also the picture - photoPath
-														console.log("Delete Photo: " + photoPath);
-													}, onFail);
-												}
-											}, onFail);
-										}, onFail);
-									}
-								})
-								/** END - Remove Contact Split Button **/
-							)
-						);
-					}
-					list.listview('refresh');
-				} else {
-					$('#contactListEmpty').show();
-					$('#contactListWrapper').hide();
-				}
-			}
-			
-			// Delete Contact
-			var deleteContact = function(e) {
-				
-			}
-			
-			// Clear Contacts
-			var clearContacts = function() {
-				
-			}
-			
-			$('#clearContact').on('click', function(e) {
-				var confirmClear = confirm("Are you sure you want to clear all contacts?");
-				if (confirmClear) {
-					db.transaction(function(tx){
-						tx.executeSql('DROP TABLE IF EXISTS contact');
-						tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
-					}, onFail, onClearSuccess);
-				}
-			});
-			
-			var onClearSuccess = function(tx, results) {
-				$('#contactList').html("");
-				$('#homeMsg').html('All contacts cleared!');
-				$.mobile.changePage("#home");
-			}
-			
-			// Upload Contact
-			var uploadContact = function() {
-				
-			}
 			
 			// Wait for PhoneGap to connect with the device
 			document.addEventListener("deviceready",onDeviceReady,false);
 
-
 			// PhoneGap is ready to be used!
 			function onDeviceReady() {
 					// Init
-					
 					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 					db.transaction(populateDB, onFail);
 					
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 			}
 			
+			// Initialize DB
+			var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+			db.transaction(populateDB, onFail);
+			
 			function populateDB(tx) {
 				tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
 			}
-	
-			// Transaction success callback
-			//
-			function successCB() {
-					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-					db.transaction(queryDB, onFail);
-			}
-	
-			// Query the database
-			//
-			function queryDB(tx) {
-					tx.executeSql('SELECT * FROM contact', [], querySuccess, onFail);
-			}
-	
-			// Query the success callback
-			//
-			function querySuccess(tx, results) {
-				var len = results.rows.length;
-				// this will be empty since no rows were inserted.
-				//console.log("Insert ID = " + results.insertId);
-				// this will be 0 since it is a select statement
-				//console.log("Rows Affected = " + results.rowAffected);
-				// the number of rows returned by the select statement
-				console.log("Result Rows = " + len);
-				if (len > 0) {
-					for (var i=0; i<len; i++){
-							console.log("Row = " + i + " ID = " + results.rows.item(i).id + " contactName =  " + results.rows.item(i).contactName);
-					}
-				}
-			}
 			
-			// File Example\
+			/** BEGIN - File Example **/
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
-				readData('README', function(evt) {
-						console.log("Read as text");
-						console.log(evt.target.result);
-						$('#homeMsg').append($('<p />', {html:evt.target.result}));
-				});
+				//$('#homeMsg').append($('<p />', {html:evt.target.result}));
 			});
-			
-			var writeData = function (filename, data, callback) {
-				var writeOutData = function () {
-					var fw = new FileWriter();
-					fw.oncomplete = callback;
-					fw.onerror = function () { 
-						alert("Failed to save update");
-					}
-					fw.writeAsText("./" + filename, data);
-				}
-				
-				navigator.fileMgr.testDirectoryExists(".", function(exists) {
-						exists ? writeOutData() :
-						navigator.fileMgr.createDirectory(".", writeOutData, function() {
-							alert("Failed to save update");
-						})
-				});
-			};
-			
-			var readData = function (filename, callback) {
-				var filePath = "./" + filename;
-				
-				var readInData = function () {
-					var fr = new FileReader();
-					fr.onload = function (data) {
-						callback(data);
-					};
-					fr.readAsText(filePath);
-				}		
-				
-				navigator.fileMgr.testFileExists(filePath, function(exists) {
-					exists ? readInData() : alert("file doesn't exist");
-				});
-			}
-	
-			
+			/** END - File Example **/
 
 			function onFileSystemSuccess(fileSystem) {
 					console.log('fileSystem.name: '+fileSystem.name);
@@ -430,6 +176,184 @@
 			function onFail(message) {
 				alert('Failed because: ' + message);
 			}
+			
+			/*
+			 * New Contact Page Functions
+			 */
+			$('#newContact').on('pageshow', function(e, ui) {
+				$("#photoPreview").hide();
+				$("#photoButton").show();
+				$("#contactForm input").val('');
+			});
+			
+			$('#photoButton').click(function() {
+				// Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
+				navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 75, allowEdit: true, 
+						destinationType : Camera.DestinationType.FILE_URI, 
+						sourceType : Camera.PictureSourceType.CAMERA, 
+						encodingType: Camera.EncodingType.JPEG,
+						targetWidth: 200,
+						targetHeight: 200 }); 
+			});
+			
+			var onPhotoURISuccess = function(imageURI) {
+				// Uncomment to view the image file URI 
+				console.log(imageURI);
+				// Get image handle
+				$("#photoPreview").attr("src", imageURI).show();
+				$("#photoButton").hide();
+				$("#photoBox").val(imageURI);
+			}
+			
+			$('#contactForm').validate({
+				rules: {
+					contactName: {required:true},
+					contactEmail: {required:true,email:true},
+					contactPhone: {required:true,digits:true}
+				},
+   			submitHandler: function() { onSaveContact() }
+			});
+			
+			// Save Contact to DB
+			var onSaveContact = function() {
+        // Init
+				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+				db.transaction(function(tx) {
+					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
+						$('#nameBox').val(),
+						$('#emailBox').val(),
+						$('#phoneBox').val(),
+						$('#photoBox').val()
+						], {}, onFail);
+				}, onFail, onSaveContactSuccess);
+			}
+			
+			var onSaveContactSuccess = function() {
+				$("#contactForm input").val('');
+				$('#homeMsg').html('Contact saved.');
+				$.mobile.changePage("#home");
+			}
+			
+			/*
+			 * Manage Contact Page Functions
+			 */
+			$('#manageContact').on('pageshow', function(e, ui) {
+				db.transaction(readDB, onFail);
+			});
+				
+			$('#manageContact').on('pagebeforehide', function(e, ui) {
+				$('#contactListEmpty').hide();
+				$('#contactListWrapper').hide();
+			});
+			
+			// Read DB
+			var readDB = function(tx) {
+        tx.executeSql('SELECT * FROM contact', [], listContact, onFail);
+			}
+			
+			// List Contact List
+			var listContact = function(tx, results) {
+				var list = $('#contactList');
+				var anchorObj;
+  			list.html("");
+				
+				var len = results.rows.length;
+				var result;
+				console.log("Result Rows = " + len);
+				if (len > 0) {
+					$('#contactListEmpty').hide();
+					$('#contactListWrapper').show();
+					for (var i=0; i<len; i++){
+						result = results.rows.item(i);
+						// Create List Item Anchor Obj
+						anchorObj = $('<a />', {name: '#'}).append(
+							$('<img />', {
+								src: 'icons/Icon512.png'
+							})).append(
+							$('<h1 />', {
+								html: result.contactName
+							})).append(
+							$('<p />', {
+								html: result.contactEmail
+							})).append(
+							$('<p />', {
+								html: result.contactPhone
+							})).append(
+							$('<p />', {
+								html: result.contactPhoto
+							}));
+						
+						// Create List Item
+						list.append(
+							$('<li />', {id: 'C'+result.id}).append(anchorObj).append(
+		
+								/** BEGIN - Remove Contact Split Button **/
+								$('<a />', {
+									href: '#C'+result.id,
+									class: 'delete'
+								}).on('click', {}, function(e) {
+									var cid = $(this).attr('href').substring(2);
+									deleteContact(cid);
+								})
+								/** END - Remove Contact Split Button **/
+							)
+						);
+					}
+					list.listview('refresh');
+				} else {
+					$('#contactListEmpty').show();
+					$('#contactListWrapper').hide();
+				}
+			}
+			
+			// Delete Contact
+			var deleteContact = function(cid) {
+				var list = $('#contactList');
+				var confirmDelete = confirm("Are you sure you want to delete this contact?");
+				if (confirmDelete) {
+					console.log('Delete CID: '+cid);
+					db.transaction(function(tx) {
+						tx.executeSql('SELECT * FROM contact WHERE id=?', [cid], function(tx, results)
+						{
+							var len = results.rows.length;
+							if (len > 0) {
+								var photoPath = results.rows.item(0).contactPhoto;
+								tx.executeSql('DELETE FROM contact WHERE id=?', [cid], function(tx, results)
+								{
+									$('#C'+cid).remove();
+									list.listview('refresh');
+									// Delete also the picture - photoPath
+									console.log("Delete Photo: " + photoPath);
+								}, onFail);
+							}
+						}, onFail);
+					}, onFail);
+				}		
+			}
+			
+			// Clear Contacts
+			$('#clearContact').on('click', function(e) {
+				var confirmClear = confirm("Are you sure you want to clear all contacts?");
+				if (confirmClear) {
+					db.transaction(function(tx){
+						tx.executeSql('DROP TABLE IF EXISTS contact');
+						tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
+					}, onFail, onClearSuccess);
+				}
+			});
+			
+			var onClearSuccess = function(tx, results) {
+				$('#contactList').html("");
+				$('#homeMsg').html('All contacts cleared!');
+				$.mobile.changePage("#home");
+			}
+			
+			// Upload Contact
+			var uploadContact = function() {
+				
+			}
+			
+				
 		});
 
     </script>
