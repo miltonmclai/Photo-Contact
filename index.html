@@ -69,16 +69,19 @@
 			$.fn.preventUglyScroll = function(){
 			
 					var node = this[0];
+					console.log(node);
 			
 					node.ontouchstart = function(event) {
 							touchStart = event;
 							frameStart = $(node).offset().top;
+							console.log('ontouchstart top:' + $(node).offset().top);
 					}
 					
 					node.ontouchmove = function(event){
 
 							// block all two finger gestures
 							if(event.touches.length > 1) {
+									console.log('ontouchmove 2 fingers preventDefault');
 									event.preventDefault();
 									return false;
 							}
@@ -87,10 +90,15 @@
 							
 							var yDiff     = event.pageY - touchStart.pageY;
 							var newTop  = yDiff + frameStart;
-							var hMin     = 460 - $(node).height();
+							var hMin     = window.innerHeight - $(node).height();
 							if(newTop <= 0 && newTop > hMin) {
 									$(node).css('margin-top', newTop);
 							}
+							console.log('ontouchmove yDiff:' + yDiff);
+							console.log('ontouchmove newTop:' + newTop);
+							console.log('ontouchmove hMin:' + hMin);
+							console.log('ontouchmove window.innerHeight:' + window.innerHeight);
+							console.log('ontouchmove $(node).height():' + $(node).height());
 					}
 			}
 				
@@ -281,101 +289,105 @@
 			// Wait for PhoneGap to connect with the device
 			document.addEventListener("deviceready",onDeviceReady,false);
 
-		});
 
-    // PhoneGap is ready to be used!
-    function onDeviceReady() {
-        // Init
-				$('#wrapper').preventUglyScroll();
-				
-				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-				db.transaction(populateDB, onFail);
-				
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
-    }
-		
-		function populateDB(tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
-		}
-
-    // Transaction success callback
-    //
-    function successCB() {
-        var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-        db.transaction(queryDB, onFail);
-    }
-
-    // Query the database
-    //
-    function queryDB(tx) {
-        tx.executeSql('SELECT * FROM contact', [], querySuccess, onFail);
-    }
-
-    // Query the success callback
-    //
-    function querySuccess(tx, results) {
-			var len = results.rows.length;
-			// this will be empty since no rows were inserted.
-			//console.log("Insert ID = " + results.insertId);
-			// this will be 0 since it is a select statement
-			//console.log("Rows Affected = " + results.rowAffected);
-			// the number of rows returned by the select statement
-			console.log("Result Rows = " + len);
-			if (len > 0) {
-        for (var i=0; i<len; i++){
-            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " contactName =  " + results.rows.item(i).contactName);
-        }
+			// PhoneGap is ready to be used!
+			function onDeviceReady() {
+					// Init
+					$('#wrapper').preventUglyScroll();
+					
+					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+					db.transaction(populateDB, onFail);
+					
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 			}
-    }
-		
-		// File Example
-
-    function gotFS(fileSystem) {
-        fileSystem.root.getFile("README", null, gotFileEntry, fail);
-    }
-
-    function gotFileEntry(fileEntry) {
-        fileEntry.file(gotFile, fail);
-    }
-
-    function gotFile(file){
-        readDataUrl(file);
-        readAsText(file);
-    }
-
-    function readDataUrl(file) {
-        var reader = new FileReader();
-        reader.onloadend = function(evt) {
-            console.log("Read as data URL");
-            console.log(evt.target.result);
-						$('#homeMsg').append($('<p />', {html:evt.target.result}));
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function readAsText(file) {
-        var reader = new FileReader();
-        reader.onloadend = function(evt) {
-            console.log("Read as text");
-            console.log(evt.target.result);
-						$('#homeMsg').append($('<p />', {html:evt.target.result}));
-        };
-        reader.readAsText(file);
-    }
-
-    function fail(evt) {
-        console.log(evt.target.error.code);
-    }
-
-    // Called if Command successfull executed
-		function onSuccess() {
-    	alert("Success!");
-		}
-
-    // Called if something bad happens.
-    function onFail(message) {
-      alert('Failed because: ' + message);
-    }
+			
+			function populateDB(tx) {
+				tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
+			}
+	
+			// Transaction success callback
+			//
+			function successCB() {
+					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+					db.transaction(queryDB, onFail);
+			}
+	
+			// Query the database
+			//
+			function queryDB(tx) {
+					tx.executeSql('SELECT * FROM contact', [], querySuccess, onFail);
+			}
+	
+			// Query the success callback
+			//
+			function querySuccess(tx, results) {
+				var len = results.rows.length;
+				// this will be empty since no rows were inserted.
+				//console.log("Insert ID = " + results.insertId);
+				// this will be 0 since it is a select statement
+				//console.log("Rows Affected = " + results.rowAffected);
+				// the number of rows returned by the select statement
+				console.log("Result Rows = " + len);
+				if (len > 0) {
+					for (var i=0; i<len; i++){
+							console.log("Row = " + i + " ID = " + results.rows.item(i).id + " contactName =  " + results.rows.item(i).contactName);
+					}
+				}
+			}
+			
+			// File Example\
+			$('#readFile').on('click', function(e) {
+				console.log("readFile: Start");
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+			});
+			
+			function gotFS(fileSystem) {
+					fileSystem.root.getFile("README", null, gotFileEntry, fail);
+			}
+	
+			function gotFileEntry(fileEntry) {
+					fileEntry.file(gotFile, fail);
+			}
+	
+			function gotFile(file){
+					readDataUrl(file);
+					readAsText(file);
+			}
+	
+			function readDataUrl(file) {
+					var reader = new FileReader();
+					reader.onloadend = function(evt) {
+							console.log("Read as data URL");
+							console.log(evt.target.result);
+							$('#homeMsg').append($('<p />', {html:evt.target.result}));
+					};
+					reader.readAsDataURL(file);
+			}
+	
+			function readAsText(file) {
+					var reader = new FileReader();
+					reader.onloadend = function(evt) {
+							console.log("Read as text");
+							console.log(evt.target.result);
+							$('#homeMsg').append($('<p />', {html:evt.target.result}));
+					};
+					reader.readAsText(file);
+			}
+	
+			function fail(evt) {
+					console.log(evt.target.error.code);
+			}
+	
+			// Called if Command successfull executed
+			function onSuccess() {
+				alert("Success!");
+			}
+	
+			// Called if something bad happens.
+			function onFail(message) {
+				alert('Failed because: ' + message);
+			}
+		});
 
     </script>
     </head>
@@ -390,6 +402,7 @@
           <div id="homeMsg"></div>
           <p><a href="#newContact" data-role="button" data-icon="plus">New Contact</a></p>
           <p><a href="#manageContact" data-role="button" data-icon="grid">Manage Contact</a></p>
+          <p><a id="readFile" href="#" data-role="button" data-icon="info">Read File</a></p>
         </div>
       </div>
       <div data-role="page" data-add-back-btn="true" id="newContact">
