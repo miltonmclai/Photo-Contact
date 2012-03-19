@@ -15,6 +15,10 @@
 				color: #09F;
 				font-weight: bold;
 			}
+			.ui-content {
+				height: 300px;
+				overflow: scroll;
+			}
 			.photoPreview {
 				width: 220px;
 				height: 220px;
@@ -85,8 +89,6 @@
 			function onDeviceReady() {
 				console.log("onDeviceReady: Start");
 				// Init
-				initDB();
-				initFile();
 			}
 
 			// Init Database
@@ -116,6 +118,7 @@
 			/** BEGIN - File Example **/
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
+				initFile();
 				saveText();
 			});
 			/** END - File Example **/
