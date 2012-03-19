@@ -73,7 +73,7 @@
 				var winInnH = $(window).innerHeight();
 				var aPageH = $('.ui-page-active').height();
 				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
-				if (aPageH > winInnH) {
+				if (winInnH >= aPageH) {
 					ev.preventDefault(); 
 				}
 			});
@@ -91,8 +91,8 @@
 			}
 			
 			// Initialize DB
-			var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-			db.transaction(populateDB, onFail);
+			//var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+			//db.transaction(populateDB, onFail);
 			
 			function populateDB(tx) {
 				tx.executeSql('CREATE TABLE IF NOT EXISTS contact (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contactName TEXT, contactEmail TEXT, contactPhone TEXT, contactPhoto TEXT)');
@@ -159,6 +159,7 @@
 					}
 					file.writer.object.write("content of file");
 				}
+				readText();
 				return false;
 			}
 			
@@ -170,6 +171,7 @@
 						reader.onloadend = function (evt) {
 							var text = evt.target.result;
 							$('#homeMsg').append($('<p />', {html:text}));
+							console.log("readText: " + text);
 						}
 						reader.readAsText(dbFile);
 					}, fail);
