@@ -78,7 +78,7 @@
 				var aPageH = $('.ui-page-active').height();
 				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
 				if (winInnH >= aPageH) {
-					ev.preventDefault(); 
+					//ev.preventDefault(); 
 				}
 			});
 			
@@ -150,7 +150,7 @@
 		
 			function gotFS(fs) {
 				console.log("gotFS: Start");
-				fileSystem.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
+				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 			}
 	
 			function gotFileEntry(fileEntry) {
