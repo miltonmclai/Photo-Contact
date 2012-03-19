@@ -83,11 +83,26 @@
 
 			// PhoneGap is ready to be used!
 			function onDeviceReady() {
-					// Init
-					var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
-					db.transaction(populateDB, onFail);
-					
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+				console.log("onDeviceReady: Start");
+				// Init
+				initDB();
+				initFile();
+			}
+
+			// Init Database
+			var db;
+			initDB();
+			
+			function initDB() {
+				console.log("initDB: Start");
+				db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+				db.transaction(populateDB, onFail);
+			}
+
+			// Init Filesystem
+			function initFile() {
+				console.log("initFile: Start");
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 			}
 			
 			// Initialize DB
