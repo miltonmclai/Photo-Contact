@@ -15,10 +15,6 @@
 				color: #09F;
 				font-weight: bold;
 			}
-			.ui-content {
-				height: 300px;
-				overflow: scroll;
-			}
 			.photoPreview {
 				width: 220px;
 				height: 220px;
@@ -78,7 +74,7 @@
 				var aPageH = $('.ui-page-active').height();
 				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
 				if (winInnH >= aPageH) {
-					//ev.preventDefault(); 
+					ev.preventDefault(); 
 				}
 			});
 			
@@ -89,6 +85,7 @@
 			function onDeviceReady() {
 				console.log("onDeviceReady: Start");
 				// Init
+				initFile();
 			}
 
 			// Init Database
@@ -116,14 +113,18 @@
 			}
 			
 			/** BEGIN - File Example **/
+			$('#saveFile').on('click', function(e) {
+				console.log("saveFile: Start");
+				saveText();
+			});
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
-				initFile();
-				saveText();
+				readText();
 			});
 			/** END - File Example **/
 
 			var FILENAME = 'README',
+					saveCount = 0,
 					file = {
 						writer: { available: false },
 						reader: { available: false }
@@ -176,8 +177,8 @@
 						file.writer.object.seek(0);
 					}
 					file.writer.object.write("content of file");
+					saveCount++;
 				}
-				readText();
 				return false;
 			}
 			
@@ -188,6 +189,7 @@
 						var reader = new FileReader();
 						reader.onloadend = function (evt) {
 							var text = evt.target.result;
+							$('#homeMsg').html('');
 							$('#homeMsg').append($('<p />', {html:text}));
 							console.log("readText: " + text);
 						}
@@ -402,6 +404,7 @@
           <div id="homeMsg"></div>
           <p><a href="#newContact" data-role="button" data-icon="plus">New Contact</a></p>
           <p><a href="#manageContact" data-role="button" data-icon="grid">Manage Contact</a></p>
+          <p><a id="saveFile" href="#" data-role="button" data-icon="info">Save File</a></p>
           <p><a id="readFile" href="#" data-role="button" data-icon="info">Read File</a></p>
         </div>
       </div>
