@@ -73,7 +73,7 @@
 				var winInnH = $(window).innerHeight();
 				var aPageH = $('.ui-page-active').height();
 				console.log('winH : ' + winH + ' | winInnH : ' + winInnH + ' aPageH | : ' + aPageH);
-				if (winInnH > aPageH) {
+				if (aPageH > winInnH) {
 					ev.preventDefault(); 
 				}
 			});
