@@ -117,7 +117,6 @@
 				console.log("saveFile: Start");
 				FILENAME = 'README';
 				FILECONTENT = 'Test Content';
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 				saveText();
 			});
 			$('#readFile').on('click', function(e) {
@@ -157,7 +156,6 @@
 			function gotFS(fs) {
 				console.log("gotFS: Start");
 				file.system = fs;
-				file.system.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 			}
 	
 			function gotFileEntry(fileEntry) {
@@ -176,6 +174,12 @@
 			
 			function saveText(e) {
 				console.log("saveText: Start");
+				console.log("saveText: Save to FS: " + file.system.name);
+				console.log("saveText: Save to Directory: " + file.system.root.name);
+				console.log("saveText: Save to Directory Full Path: " + file.system.root.fullPath);
+				console.log("saveText: Save to Directory URI: " + file.system.root.toURI());
+				console.log("saveText: Save to Directory META: " + file.system.root.getMetadata());
+				file.system.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 				if (file.writer.available) { 
 					file.writer.available = false;
 					file.writer.object.onwriteend = function (evt) {
@@ -190,6 +194,12 @@
 			
 			function readText() {
 				console.log("readText: Start");
+				console.log("readText: Read from FS: " + file.system.name);
+				console.log("readText: Read from Directory: " + file.system.root.name);
+				console.log("readText: Read from Directory Full Path: " + file.system.root.fullPath);
+				console.log("readText: Read from Directory URI: " + file.system.root.toURI());
+				console.log("readText: Read from Directory META: " + file.system.root.getMetadata());
+				file.system.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 				if (file.entry) {
 					file.entry.file(function (dbFile) {
 						var reader = new FileReader();
