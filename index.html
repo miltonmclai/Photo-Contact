@@ -155,14 +155,12 @@
 		
 			function gotFS(fs) {
 				console.log("gotFS: Start");
-				file.system = fs;
 				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 				console.log("gotFS: End");
 			}
 	
 			function gotFileEntry(fileEntry) {
 				console.log("gotFileEntry: Start");
-				console.log(file.system);
 				//fileEntry.file(gotFile, fail);
 				file.entry = fileEntry;
 				fileEntry.createWriter(gotFileWriter, fail);
@@ -195,20 +193,40 @@
 			}
 			
 			function readText() {
+				var filename = 'README';
 				console.log("readText: Start");
-				if (file.entry) {
-					file.entry.file(function (targetFile) {
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotRFS, fail);
+						
+				function gotRFS(fs) {
+					console.log("gotRFS: Start");
+					if (filename) {
+						console.log('gotRFS: ' + filename);
+					}
+					fs.root.getFile(FILENAME, {create: false, exclusive: true}, gotRFileEntry, fail);
+					console.log("gotRFS: End");
+				}
+	
+				function gotRFileEntry(fileEntry) {
+					console.log("gotRFileEntry: Start");
+					if (filename) {
+						console.log('gotRFileEntry: ' + filename);
+					}
+					fileEntry.file(function (targetFile) {
+						if (filename) {
+							console.log('fileEntry.file: ' + filename);
+						}
 						var reader = new FileReader();
 						reader.onload = function (evt) {
+							if (filename) {
+								console.log('reader.onload: ' + filename);
+							}
 							var text = evt.target.result;
 							$('#homeMsg').html(text);
 							console.log("readText: " + text);
 						}
 						reader.readAsText(targetFile);
 					}, fail);
-				} else {
-					initFile('README');
-					readText();
+					console.log("gotRFileEntry: End");
 				}
 				console.log("readText: End");
 			}
