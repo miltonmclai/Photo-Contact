@@ -84,8 +84,6 @@
 			// PhoneGap is ready to be used!
 			function onDeviceReady() {
 				console.log("onDeviceReady: Start");
-				// Init
-				initFile();
 			}
 
 			// Init Database
@@ -96,13 +94,6 @@
 				console.log("initDB: Start");
 				db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(populateDB, onFail);
-			}
-
-			// Init Filesystem
-			function initFile(filename) {
-				console.log("initFile: Start");
-				FILENAME = filename
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 			}
 			
 			// Initialize DB
@@ -130,19 +121,15 @@
 			/** END - File Example **/
 			
 			function saveText(filename, saveText) {
-				console.log("saveText: Start");
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 				
 				function gotFS(fs) {
-					console.log("gotWFS: Start");
 					fs.root.getFile(filename, {create: true, exclusive: false}, gotFileEntry, fail);
 				}
 				function gotFileEntry(fileEntry) {
-					console.log("gotFileEntry: Start");
 					fileEntry.createWriter(gotFileWriter, fail);
 				}
 				function gotFileWriter(fileWriter) {
-					console.log("gotFileWriter: Start");
 					fileWriter.onwrite = function (evt) {
 						console.log("gotFileWriter: Write Success");
 					}
@@ -151,19 +138,15 @@
 			}
 			
 			function readText(filename) {
-				console.log("readText: Start");
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 						
 				function gotFS(fs) {
-					console.log("gotRFS: Start");
 					fs.root.getFile(filename, {create: false, exclusive: true}, gotFileEntry, fail);
 				}
 				function gotFileEntry(fileEntry) {
-					console.log("gotRFileEntry: Start");
 					fileEntry.file(gotFile, fail);
 				}
 				function gotFile(targetFile) {
-					console.log("gotRFile: Start");
 					var reader = new FileReader();
 					reader.onload = function (evt) {
 						var text = evt.target.result;
@@ -210,10 +193,28 @@
 			var onPhotoURISuccess = function(imageURI) {
 				// Uncomment to view the image file URI 
 				console.log(imageURI);
-				// Get image handle
-				$("#photoPreview").attr("src", imageURI).show();
-				$("#photoButton").hide();
-				$("#photoBox").val(imageURI);
+				saveImg(imageURI);
+			}
+			
+			function saveImg(imageURI) {
+				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
+				
+				function gotFileEntry(fileEntry) {
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+					
+					function gotFS(fs) {
+						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
+					}
+					function gotDirEntry(dirEntry) {
+						fileEntry.moveTo(dirEntry, fileEntry.name, function (entry) {
+							// Get image handle
+							$("#photoPreview").attr("src", entry.fullPath).show();
+							$("#photoButton").hide();
+							$("#photoBox").val(entry.fullPath);
+							console.log('Save Success: ' + entry.fullPath);
+						}, fail);
+					}
+				}
 			}
 			
 			$('#contactForm').validate({
