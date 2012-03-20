@@ -115,15 +115,20 @@
 			/** BEGIN - File Example **/
 			$('#saveFile').on('click', function(e) {
 				console.log("saveFile: Start");
+				FILENAME = 'README';
+				FILECONTENT = 'Test Content';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 				saveText();
 			});
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
+				FILENAME = 'README';
 				readText();
 			});
 			/** END - File Example **/
 
-			var FILENAME = 'README',
+			var FILENAME = '',
+					FILECONTENT = '',
 					saveCount = 0,
 					file = {
 						writer: { available: false },
@@ -151,7 +156,8 @@
 		
 			function gotFS(fs) {
 				console.log("gotFS: Start");
-				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
+				file.system = fs;
+				file.system.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 			}
 	
 			function gotFileEntry(fileEntry) {
@@ -176,7 +182,7 @@
 						file.writer.available = true;
 						file.writer.object.seek(0);
 					}
-					file.writer.object.write("content of file");
+					file.writer.object.write("content of file " + saveCount + "\n");
 					saveCount++;
 				}
 				return false;
