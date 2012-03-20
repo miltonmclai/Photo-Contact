@@ -115,13 +115,8 @@
 			
 			/** BEGIN - File Example **/
 
-			var FILENAME = '',
-					FILECONTENT = '',
-					saveCount = 0,
-					file = {
-						writer: { available: false },
-						reader: { available: false }
-					};
+			var saveCount = 0;
+			
 			$('#saveFile').on('click', function(e) {
 				console.log("saveFile: Start");
 				saveText('README', 'Test Content: ' + saveCount++ + "\n");
@@ -134,91 +129,40 @@
 			});
 			/** END - File Example **/
 			
-/*			function gotFS(fs) {
-					console.log('fs.name: '+fs.name);
-					console.log('fs.root.name: '+fs.root.name);
-					console.log('fs.root.fullPath: '+fs.root.fullPath);
-					console.log('fs.root.name: '+fs.root.name);
-					
-					var directoryReader = fileSystem.root.createReader();
-	
-					// Get a list of all the entries in the directory
-					directoryReader.readEntries(readDirSuccess,fail);
-			}
-			
-			function readDirSuccess(entries) {
-				var i;
-				for (i=0; i<entries.length; i++) {
-					console.log(entries[i].name);
-				}
-			}*/
-		
-/*			function gotFS(fs) {
-				console.log("gotFS: Start");
-				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
-				console.log("gotFS: End");
-			}
-	
-			function gotFileEntry(fileEntry) {
-				console.log("gotFileEntry: Start");
-				//fileEntry.file(gotFile, fail);
-				file.entry = fileEntry;
-				fileEntry.createWriter(gotFileWriter, fail);
-				console.log("gotFileEntry: End");
-			}
-
-			function gotFileWriter(fileWriter) {
-				console.log("gotFileWriter: Start");
-				file.writer.available = true;
-				file.writer.object = fileWriter;
-				console.log("gotFileWriter: End");
-			}*/
-			
 			function saveText(filename, saveText) {
 				console.log("saveText: Start");
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotWFS, fail);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 				
-				function gotWFS(fs) {
+				function gotFS(fs) {
 					console.log("gotWFS: Start");
-					fs.root.getFile(filename, {create: true, exclusive: false}, gotWFileEntry, fail);
-					//console.log("gotWFS: End");
+					fs.root.getFile(filename, {create: true, exclusive: false}, gotFileEntry, fail);
 				}
-	
-				function gotWFileEntry(fileEntry) {
+				function gotFileEntry(fileEntry) {
 					console.log("gotFileEntry: Start");
 					fileEntry.createWriter(gotFileWriter, fail);
-					//console.log("gotFileEntry: End");
 				}
-
 				function gotFileWriter(fileWriter) {
 					console.log("gotFileWriter: Start");
 					fileWriter.onwrite = function (evt) {
 						console.log("gotFileWriter: Write Success");
-						//evt.target.seek(0);
 					}
 					fileWriter.write(saveText);
-					//console.log("gotFileWriter: End");
 				}
-				//console.log("saveText: End");
 			}
 			
 			function readText(filename) {
 				console.log("readText: Start");
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotRFS, fail);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 						
-				function gotRFS(fs) {
+				function gotFS(fs) {
 					console.log("gotRFS: Start");
-					fs.root.getFile(filename, {create: false, exclusive: true}, gotRFileEntry, fail);
-					//console.log("gotRFS: End");
+					fs.root.getFile(filename, {create: false, exclusive: true}, gotFileEntry, fail);
 				}
-	
-				function gotRFileEntry(fileEntry) {
+				function gotFileEntry(fileEntry) {
 					console.log("gotRFileEntry: Start");
-					fileEntry.file(gotRFile, fail);
-					//console.log("gotRFileEntry: End");
+					fileEntry.file(gotFile, fail);
 				}
-				
-				function gotRFile(targetFile) {
+				function gotFile(targetFile) {
 					console.log("gotRFile: Start");
 					var reader = new FileReader();
 					reader.onload = function (evt) {
@@ -227,15 +171,8 @@
 						console.log("readText: " + text);
 					}
 					reader.readAsText(targetFile);
-					//console.log("gotRFile: End");
 				}
-				
-				//console.log("readText: End");
 			}
-	
-/*			function fail(evt) {
-				console.log(evt.target.error.code);
-			}*/
 	
 			function fail(error) {
 				console.log(error.code);
