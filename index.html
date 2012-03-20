@@ -193,25 +193,45 @@
 			var onPhotoURISuccess = function(imageURI) {
 				// Uncomment to view the image file URI 
 				console.log(imageURI);
-				saveImg(imageURI);
+				// Get image handle
+				$("#photoPreview").attr("src", imageURI).show();
+				$("#photoButton").hide();
+				$("#photoBox").val(imageURI);
 			}
 			
-			function saveImg(imageURI) {
+			function saveImg(imageURI, insertId) {
+        console.log('saveImg: Start');
 				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
+				var newFilename = 'IMG'+insertId+'.jpg';
 				
 				function gotFileEntry(fileEntry) {
+        	console.log('gotFileEntry: Start');
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 					
 					function gotFS(fs) {
+        		console.log('gotFS: Start');
 						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
 					}
 					function gotDirEntry(dirEntry) {
-						fileEntry.moveTo(dirEntry, fileEntry.name, function (entry) {
-							// Get image handle
-							$("#photoPreview").attr("src", entry.fullPath).show();
-							$("#photoButton").hide();
-							$("#photoBox").val(entry.fullPath);
+        		console.log('gotDirEntry: Start');
+						fileEntry.moveTo(dirEntry, newFilename, function (entry) {
 							console.log('Save Success: ' + entry.fullPath);
+							
+							var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
+							db.transaction(function(tx) {
+        				console.log('gotDirEntry: Execute UPDATE SQL');
+								tx.executeSql('UPDATE contact contactPhoto=? WHERE id=?', [
+									newFilename,
+									insertId
+									], {}, onFail);
+							}, onFail, onUpdateContactSuccess);
+						
+							var onUpdateContactSuccess = function(tx, results) {
+        				console.log('onUpdateContactSuccess: Start');
+								$("#contactForm input").val('');
+								$('#homeMsg').html('Contact saved.');
+								$.mobile.changePage("#home");
+							}
 						}, fail);
 					}
 				}
@@ -228,9 +248,10 @@
 			
 			// Save Contact to DB
 			var onSaveContact = function() {
-        // Init
+        console.log('onSaveContact: Start');
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(function(tx) {
+        	console.log('onSaveContact: Execute INSERT SQL');
 					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
 						$('#nameBox').val(),
 						$('#emailBox').val(),
@@ -238,12 +259,11 @@
 						$('#photoBox').val()
 						], {}, onFail);
 				}, onFail, onSaveContactSuccess);
-			}
 			
-			var onSaveContactSuccess = function() {
-				$("#contactForm input").val('');
-				$('#homeMsg').html('Contact saved.');
-				$.mobile.changePage("#home");
+				var onSaveContactSuccess = function(tx, results) {
+        	console.log('onSaveContactSuccess: Start');
+					saveImg($('#photoBox').val(), results.insertId);
+				}
 			}
 			
 			/*
