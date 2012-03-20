@@ -124,12 +124,12 @@
 					};
 			$('#saveFile').on('click', function(e) {
 				console.log("saveFile: Start");
-				saveText('Test Content: ' + saveCount + "\n");
+				saveText('README', 'Test Content: ' + saveCount + "\n");
 				console.log("saveFile: End");
 			});
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
-				readText();
+				readText('README');
 				console.log("readFile: End");
 			});
 			/** END - File Example **/
@@ -153,7 +153,7 @@
 				}
 			}*/
 		
-			function gotFS(fs) {
+/*			function gotFS(fs) {
 				console.log("gotFS: Start");
 				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
 				console.log("gotFS: End");
@@ -172,28 +172,37 @@
 				file.writer.available = true;
 				file.writer.object = fileWriter;
 				console.log("gotFileWriter: End");
-			}
+			}*/
 			
-			function saveText(saveText) {
+			function saveText(filename, saveText) {
 				console.log("saveText: Start");
-				if (file.writer.available) { 
-					console.log("saveText: file.writer.available");
-					file.writer.available = false;
-					file.writer.object.onwrite = function (evt) {
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotWFS, fail);
+				
+				function gotWFS(fs) {
+					console.log("gotWFS: Start");
+					fs.root.getFile(filename, {create: true, exclusive: false}, gotWFileEntry, fail);
+					console.log("gotWFS: End");
+				}
+	
+				function gotWFileEntry(fileEntry) {
+					console.log("gotFileEntry: Start");
+					fileEntry.createWriter(gotFileWriter, fail);
+					console.log("gotFileEntry: End");
+				}
+
+				function gotFileWriter(fileWriter) {
+					console.log("gotFileWriter: Start");
+					fileWriter.onwrite = function (evt) {
 						file.writer.available = true;
 						file.writer.object.seek(0);
 					}
-					file.writer.object.write(saveText);
-					saveCount++;
-				} else {
-					initFile('README');
-					saveText(saveText);
+					fileWriter.write(saveText);
+					console.log("gotFileWriter: End");
 				}
 				console.log("saveText: End");
 			}
 			
-			function readText() {
-				var filename = 'README';
+			function readText(filename) {
 				console.log("readText: Start");
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotRFS, fail);
 						
@@ -202,7 +211,7 @@
 					if (filename) {
 						console.log('gotRFS: ' + filename);
 					}
-					fs.root.getFile(FILENAME, {create: false, exclusive: true}, gotRFileEntry, fail);
+					fs.root.getFile(filename, {create: false, exclusive: true}, gotRFileEntry, fail);
 					console.log("gotRFS: End");
 				}
 	
