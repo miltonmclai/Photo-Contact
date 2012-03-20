@@ -257,8 +257,8 @@
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
 						$('#photoBox').val()
-						], {}, onFail);
-				}, onFail, onSaveContactSuccess);
+						], onSaveContactSuccess, onFail);
+				}, onFail, {});
 			
 				var onSaveContactSuccess = function(tx, results) {
         	console.log('onSaveContactSuccess: Start');
