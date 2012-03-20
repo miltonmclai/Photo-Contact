@@ -124,7 +124,7 @@
 					};
 			$('#saveFile').on('click', function(e) {
 				console.log("saveFile: Start");
-				saveText('README', 'Test Content: ' + saveCount + "\n");
+				saveText('README', 'Test Content: ' + saveCount++ + "\n");
 				console.log("saveFile: End");
 			});
 			$('#readFile').on('click', function(e) {
@@ -181,13 +181,13 @@
 				function gotWFS(fs) {
 					console.log("gotWFS: Start");
 					fs.root.getFile(filename, {create: true, exclusive: false}, gotWFileEntry, fail);
-					console.log("gotWFS: End");
+					//console.log("gotWFS: End");
 				}
 	
 				function gotWFileEntry(fileEntry) {
 					console.log("gotFileEntry: Start");
 					fileEntry.createWriter(gotFileWriter, fail);
-					console.log("gotFileEntry: End");
+					//console.log("gotFileEntry: End");
 				}
 
 				function gotFileWriter(fileWriter) {
@@ -197,9 +197,9 @@
 						//evt.target.seek(0);
 					}
 					fileWriter.write(saveText);
-					console.log("gotFileWriter: End");
+					//console.log("gotFileWriter: End");
 				}
-				console.log("saveText: End");
+				//console.log("saveText: End");
 			}
 			
 			function readText(filename) {
@@ -209,13 +209,13 @@
 				function gotRFS(fs) {
 					console.log("gotRFS: Start");
 					fs.root.getFile(filename, {create: false, exclusive: true}, gotRFileEntry, fail);
-					console.log("gotRFS: End");
+					//console.log("gotRFS: End");
 				}
 	
 				function gotRFileEntry(fileEntry) {
 					console.log("gotRFileEntry: Start");
 					fileEntry.file(gotRFile, fail);
-					console.log("gotRFileEntry: End");
+					//console.log("gotRFileEntry: End");
 				}
 				
 				function gotRFile(targetFile) {
@@ -227,10 +227,10 @@
 						console.log("readText: " + text);
 					}
 					reader.readAsText(targetFile);
-					console.log("gotRFile: End");
+					//console.log("gotRFile: End");
 				}
 				
-				console.log("readText: End");
+				//console.log("readText: End");
 			}
 	
 /*			function fail(evt) {
