@@ -99,8 +99,10 @@
 			}
 
 			// Init Filesystem
-			function initFile() {
+			function initFile(filename) {
 				console.log("initFile: Start");
+				FILENAME = filename
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 			}
 			
 			// Initialize DB
@@ -112,18 +114,6 @@
 			}
 			
 			/** BEGIN - File Example **/
-			$('#saveFile').on('click', function(e) {
-				console.log("saveFile: Start");
-				FILENAME = 'README';
-				FILECONTENT = 'Test Content';
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
-				saveText();
-			});
-			$('#readFile').on('click', function(e) {
-				console.log("readFile: Start");
-				readText();
-			});
-			/** END - File Example **/
 
 			var FILENAME = '',
 					FILECONTENT = '',
@@ -132,6 +122,15 @@
 						writer: { available: false },
 						reader: { available: false }
 					};
+			$('#saveFile').on('click', function(e) {
+				console.log("saveFile: Start");
+				saveText('Test Content' + saveCount + "\n");
+			});
+			$('#readFile').on('click', function(e) {
+				console.log("readFile: Start");
+				readText();
+			});
+			/** END - File Example **/
 			
 /*			function gotFS(fs) {
 					console.log('fs.name: '+fs.name);
@@ -173,38 +172,46 @@
 				file.writer.object = fileWriter;
 			}
 			
-			function saveText(e) {
+			function saveText(saveText) {
 				console.log("saveText: Start");
 				if (file.writer.available) { 
 					file.writer.available = false;
-					file.writer.object.onwriteend = function (evt) {
+					file.writer.object.onwrite = function (evt) {
 						file.writer.available = true;
 						file.writer.object.seek(0);
 					}
-					file.writer.object.write("content of file " + saveCount+ "\n");
+					file.writer.object.write(saveText);
 					saveCount++;
+				} else {
+					initFile('README');
+					saveText();
 				}
-				return false;
 			}
 			
 			function readText() {
 				console.log("readText: Start");
 				if (file.entry) {
-					file.entry.file(function (dbFile) {
+					file.entry.file(function (targetFile) {
 						var reader = new FileReader();
-						reader.onloadend = function (evt) {
+						reader.onload = function (evt) {
 							var text = evt.target.result;
-							$('#homeMsg').html('');
-							$('#homeMsg').append($('<p />', {html:text}));
+							$('#homeMsg').html(text);
 							console.log("readText: " + text);
 						}
-						reader.readAsText(dbFile);
+						reader.readAsText(targetFile);
 					}, fail);
+				} else {
+					initFile('README');
+					readText();
 				}
 			}
 	
-			function fail(evt) {
+/*			function fail(evt) {
 				console.log(evt.target.error.code);
+			}*/
+	
+			function fail(error) {
+				console.log(error.code);
 			}
 	
 			// Called if Command successfull executed
