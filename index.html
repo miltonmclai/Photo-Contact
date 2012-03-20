@@ -124,11 +124,13 @@
 					};
 			$('#saveFile').on('click', function(e) {
 				console.log("saveFile: Start");
-				saveText('Test Content' + saveCount + "\n");
+				saveText('Test Content: ' + saveCount + "\n");
+				console.log("saveFile: End");
 			});
 			$('#readFile').on('click', function(e) {
 				console.log("readFile: Start");
 				readText();
+				console.log("readFile: End");
 			});
 			/** END - File Example **/
 			
@@ -155,6 +157,7 @@
 				console.log("gotFS: Start");
 				file.system = fs;
 				fs.root.getFile(FILENAME, {create: true, exclusive: false}, gotFileEntry, fail);
+				console.log("gotFS: End");
 			}
 	
 			function gotFileEntry(fileEntry) {
@@ -163,18 +166,20 @@
 				//fileEntry.file(gotFile, fail);
 				file.entry = fileEntry;
 				fileEntry.createWriter(gotFileWriter, fail);
-    		//readText();
+				console.log("gotFileEntry: End");
 			}
 
 			function gotFileWriter(fileWriter) {
 				console.log("gotFileWriter: Start");
 				file.writer.available = true;
 				file.writer.object = fileWriter;
+				console.log("gotFileWriter: End");
 			}
 			
 			function saveText(saveText) {
 				console.log("saveText: Start");
 				if (file.writer.available) { 
+					console.log("saveText: file.writer.available");
 					file.writer.available = false;
 					file.writer.object.onwrite = function (evt) {
 						file.writer.available = true;
@@ -184,8 +189,9 @@
 					saveCount++;
 				} else {
 					initFile('README');
-					saveText();
+					saveText(saveText);
 				}
+				console.log("saveText: End");
 			}
 			
 			function readText() {
@@ -204,6 +210,7 @@
 					initFile('README');
 					readText();
 				}
+				console.log("readText: End");
 			}
 	
 /*			function fail(evt) {
