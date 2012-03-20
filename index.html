@@ -193,8 +193,8 @@
 				function gotFileWriter(fileWriter) {
 					console.log("gotFileWriter: Start");
 					fileWriter.onwrite = function (evt) {
-						file.writer.available = true;
-						file.writer.object.seek(0);
+						console.log("gotFileWriter: Write Success");
+						//evt.target.seek(0);
 					}
 					fileWriter.write(saveText);
 					console.log("gotFileWriter: End");
@@ -208,35 +208,28 @@
 						
 				function gotRFS(fs) {
 					console.log("gotRFS: Start");
-					if (filename) {
-						console.log('gotRFS: ' + filename);
-					}
 					fs.root.getFile(filename, {create: false, exclusive: true}, gotRFileEntry, fail);
 					console.log("gotRFS: End");
 				}
 	
 				function gotRFileEntry(fileEntry) {
 					console.log("gotRFileEntry: Start");
-					if (filename) {
-						console.log('gotRFileEntry: ' + filename);
-					}
-					fileEntry.file(function (targetFile) {
-						if (filename) {
-							console.log('fileEntry.file: ' + filename);
-						}
-						var reader = new FileReader();
-						reader.onload = function (evt) {
-							if (filename) {
-								console.log('reader.onload: ' + filename);
-							}
-							var text = evt.target.result;
-							$('#homeMsg').html(text);
-							console.log("readText: " + text);
-						}
-						reader.readAsText(targetFile);
-					}, fail);
+					fileEntry.file(gotRFile, fail);
 					console.log("gotRFileEntry: End");
 				}
+				
+				function gotRFile(targetFile) {
+					console.log("gotRFile: Start");
+					var reader = new FileReader();
+					reader.onload = function (evt) {
+						var text = evt.target.result;
+						$('#homeMsg').html(text);
+						console.log("readText: " + text);
+					}
+					reader.readAsText(targetFile);
+					console.log("gotRFile: End");
+				}
+				
 				console.log("readText: End");
 			}
 	
