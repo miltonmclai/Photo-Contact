@@ -174,11 +174,16 @@
 			/*
 			 * New Contact Page Functions
 			 */
-			$('#newContact').on('pageshow', function(e, ui) {
+			$('#newContact').on('pagebeforeshow', function(e, ui) {
+				clearForm();
+			});
+			
+			var clearForm = function() {
+				$("#photoPreview").attr("src", '');
 				$("#photoPreview").hide();
 				$("#photoButton").show();
 				$("#contactForm input").val('');
-			});
+			}
 			
 			$('#photoButton').click(function() {
 				// Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
@@ -197,7 +202,6 @@
 				$("#photoPreview").attr("src", imageURI).show();
 				$("#photoButton").hide();
 				$("#photoBox").val(imageURI);
-				$("#nameBox").val(imageURI);
 				//saveImg(imageURI);
 			}
 			
@@ -213,6 +217,7 @@
 			// Save Contact to DB
 			var onSaveContact = function() {
         // Init
+				var imageURI = $("#photoPreview").attr("src");
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(function(tx) {
 					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
@@ -225,18 +230,16 @@
 				
 				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
-					console.log(tx);
-					console.log(results);
-					console.log("Insert ID = " + results.insertId);
-					console.log("Rows Affected = " + results.rowAffected);
-					console.log("Result Set Length = " + results.rows.length);
-					$("#contactForm input").val('');
+					if (imageURI.length > 0) {
+						saveImg(imageURI, results.insertId);
+					}
+					clearForm();
 					$('#homeMsg').html('Contact saved.');
 					$.mobile.changePage("#home");
 				}
 			}
 			
-			function saveImg(imageURI) {
+			function saveImg(imageURI, insertId) {
 				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
 				
 				function gotFileEntry(fileEntry) {
@@ -246,7 +249,7 @@
 						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
 					}
 					function gotDirEntry(dirEntry) {
-						fileEntry.moveTo(dirEntry, fileEntry.name, function (entry) {
+						fileEntry.moveTo(dirEntry, 'IMG_'+insertId+'.jpg', function (entry) {
 							console.log('Save Success: ' + entry.fullPath);
 						}, fail);
 					}
