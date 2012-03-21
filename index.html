@@ -291,65 +291,6 @@
         tx.executeSql('SELECT * FROM contact', [], listContact, onFail);
 			}
 			
-			// List Contact List
-/*			var listContact = function(tx, results) {
-				var list = $('#contactList');
-				var anchorObj;
-  			list.html("");
-				
-				var len = results.rows.length;
-				var result;
-				console.log("Result Rows = " + len);
-				
-				if (len > 0) {
-					$('#contactListEmpty').hide();
-					$('#contactListWrapper').show();
-					for (var i=0; i<len; i++){
-						result = results.rows.item(i);
-						console.log("Photo:"+result.contactPhoto);
-						readImg(result.contactPhoto);
-						// Create List Item Anchor Obj
-						anchorObj = $('<a />', {name: '#'}).append(
-							$('<img />', {
-								src: 'icons/Icon512.png'
-							})).append(
-							$('<h1 />', {
-								html: result.contactName
-							})).append(
-							$('<p />', {
-								html: result.contactEmail
-							})).append(
-							$('<p />', {
-								html: result.contactPhone
-							})).append(
-							$('<p />', {
-								html: result.contactPhoto
-							}));
-						
-						// Create List Item
-						list.append(
-							$('<li />', {id: 'C'+result.id}).append(anchorObj).append(
-		
-								// BEGIN - Remove Contact Split Button
-								$('<a />', {
-									href: '#C'+result.id,
-									class: 'delete'
-								}).on('click', {}, function(e) {
-									var cid = $(this).attr('href').substring(2);
-									deleteContact(cid);
-								})
-								// END - Remove Contact Split Button
-							)
-						);
-					}
-					list.listview('refresh');
-				} else {
-					$('#contactListEmpty').show();
-					$('#contactListWrapper').hide();
-				}
-			}*/
-			
-			
 			var listContact = function(tx, results) {
 				console.log('listContact');
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
