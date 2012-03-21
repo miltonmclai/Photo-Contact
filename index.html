@@ -306,6 +306,7 @@
 					$('#contactListWrapper').show();
 					for (var i=0; i<len; i++){
 						result = results.rows.item(i);
+						console.log("Photo:"+result.contactPhoto);
 						readImg(result.contactPhoto);
 						// Create List Item Anchor Obj
 						anchorObj = $('<a />', {name: '#'}).append(
@@ -350,11 +351,12 @@
 			
 			
 			function readImg(filename) {
+				console.log('readImg');
 				window.requestFileSystem('file://photo/'+filename, gotFile, fail);
 						
 				function gotFile(fileEntry) {
-					console.log('fileEntry.name'+fileEntry.name);
-					console.log('fileEntry.fullPath'+fileEntry.fullPath);
+					console.log('fileEntry.name: '+fileEntry.name);
+					console.log('fileEntry.fullPath: '+fileEntry.fullPath);
 				}
 			}
 			
