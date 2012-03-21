@@ -252,12 +252,12 @@
 					function gotDirEntry(dirEntry) {
 						fileEntry.moveTo(dirEntry, newFilename, function (entry) {
 							console.log('Save Success: ' + entry.fullPath);
-							db.transaction(function(tx) {
+/*							db.transaction(function(tx) {
 								tx.executeSql('UPDATE contact SET contactPhoto=? WHERE id=?', [
 									newFilename,
 									insertId
 									], onUpdateContactSuccess, onFail);
-							}, onFail);
+							}, onFail);*/
 						}, fail);
 					}
 					var onUpdateContactSuccess = function(tx, results) {
