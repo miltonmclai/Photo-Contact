@@ -220,7 +220,7 @@
 				var imageURI = $("#photoPreview").attr("src");
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(function(tx) {
-					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto, contactPhotoURI) VALUES (?,?,?,?)', [
+					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
 						$('#nameBox').val(),
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
