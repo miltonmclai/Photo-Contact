@@ -220,7 +220,7 @@
 				var imageURI = $("#photoPreview").attr("src");
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(function(tx) {
-					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
+					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto, contactPhotoURI) VALUES (?,?,?,?)', [
 						$('#nameBox').val(),
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
@@ -352,7 +352,14 @@
 			
 			function readImg(filename) {
 				console.log('readImg');
-				window.resolveLocalFileSystemURI('file:///photo/'+filename, gotFile, fileNotFound);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+				
+				function gotFS(fs) {
+					fs.root.getDirectory('photo', {create: false}, gotDirEntry, fail);
+				}
+				function gotDirEntry(dirEntry) {
+					dirEntry.getFile(filename, {create: false}, gotFile, fail);
+				}
 						
 				function gotFile(fileEntry) {
 					console.log('gotFile');
@@ -360,7 +367,8 @@
 					console.log('fileEntry.fullPath: '+fileEntry.fullPath);
 				}
 						
-				function fileNotFound(error) {
+				function fail(error) {
+					console.log(error);
 					alert(error.code);
 				}
 			}
