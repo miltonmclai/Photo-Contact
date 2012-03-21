@@ -352,7 +352,7 @@
 			
 			function readImg(filename) {
 				console.log('readImg');
-				window.requestFileSystem('file:///photo/'+filename, gotFile, fileNotFound);
+				window.resolveLocalFileSystemURI('file:///photo/'+filename, gotFile, fileNotFound);
 						
 				function gotFile(fileEntry) {
 					console.log('gotFile');
