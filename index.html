@@ -218,7 +218,6 @@
 			var onSaveContact = function() {
         // Init
 				var imageURI = $("#photoPreview").attr("src");
-				var imageURIp = $("#photoPreview").prop("src");
 				var db = window.openDatabase("contacts", "1.0", "Contacts DB", 1000000);
 				db.transaction(function(tx) {
 					tx.executeSql('INSERT INTO contact (contactName, contactEmail, contactPhone, contactPhoto) VALUES (?,?,?,?)', [
@@ -231,11 +230,9 @@
 				
 				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
-					console.log("Save IMG attr: " + imageURI);
-					console.log("Save IMG prop: " + imageURIp);
 					if (imageURI.length > 0) {
 						console.log(results.insertId);
-						//saveImg(imageURI, results.insertId);
+						saveImg(imageURI, results.insertId);
 					}
 					clearForm();
 					$('#homeMsg').html('Contact saved.');
@@ -244,6 +241,7 @@
 			}
 			
 			function saveImg(imageURI, insertId) {
+				console.log("saveImg");
 				var newFilename = 'IMG_' + zeroFill(insertId,4) + '.jpg';
 				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
 				
