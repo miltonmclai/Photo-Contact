@@ -220,15 +220,17 @@
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
 						$('#photoBox').val()
-						], onInsertContactSuccess, onFail);
+						], {}, onFail);
 				}, onFail, onSaveContactSuccess);
 			
 				var onInsertContactSuccess = function() {
 					console.log("onInsertContactSuccess");
 				}
 				
-				var onSaveContactSuccess = function() {
+				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
+					console.log(tx);
+					console.log(results);
 					$("#contactForm input").val('');
 					$('#homeMsg').html('Contact saved.');
 					$.mobile.changePage("#home");
