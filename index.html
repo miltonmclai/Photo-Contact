@@ -255,24 +255,24 @@
 					function gotDirEntry(dirEntry) {
 						fileEntry.moveTo(dirEntry, newFilename, function (entry) {
 							console.log('Save Success: ' + entry.fullPath);
-/*							db.transaction(function(tx) {
+							db.transaction(function(tx) {
 								tx.executeSql('UPDATE contact SET contactPhoto=? WHERE id=?', [
 									newFilename,
 									insertId
 									], onUpdateContactSuccess, onFail);
-							}, onFail);*/
+							}, onFail);
 						}, fail);
 					}
 					var onUpdateContactSuccess = function(tx, results) {
 						console.log("onUpdateContactSuccess");
 					}
-					function zeroFill(number, width) {
-						width -= number.toString().length;
-						if ( width > 0 ) {
-							return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
-						}
-						return number;
+				}
+				function zeroFill(number, width) {
+					width -= number.toString().length;
+					if ( width > 0 ) {
+						return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
 					}
+					return number;
 				}
 			}
 			
