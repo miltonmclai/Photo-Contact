@@ -230,9 +230,7 @@
 				
 				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
-					console.log("Save IMG attr: " + imageURI);
 					if (imageURI.length > 0) {
-						console.log("insertId: " + results.insertId);
 						saveImg(imageURI, results.insertId);
 					}
 					clearForm();
@@ -302,11 +300,13 @@
 				var len = results.rows.length;
 				var result;
 				console.log("Result Rows = " + len);
+				
 				if (len > 0) {
 					$('#contactListEmpty').hide();
 					$('#contactListWrapper').show();
 					for (var i=0; i<len; i++){
 						result = results.rows.item(i);
+						readImg(result.contactPhoto);
 						// Create List Item Anchor Obj
 						anchorObj = $('<a />', {name: '#'}).append(
 							$('<img />', {
@@ -345,6 +345,16 @@
 				} else {
 					$('#contactListEmpty').show();
 					$('#contactListWrapper').hide();
+				}
+			}
+			
+			
+			function readImg(filename) {
+				window.requestFileSystem('file://photo/'+filename, gotFile, fail);
+						
+				function gotFile(fileEntry) {
+					console.log('fileEntry.name'+fileEntry.name);
+					console.log('fileEntry.fullPath'+fileEntry.fullPath);
 				}
 			}
 			
