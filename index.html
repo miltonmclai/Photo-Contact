@@ -352,11 +352,16 @@
 			
 			function readImg(filename) {
 				console.log('readImg');
-				window.requestFileSystem('file://photo/'+filename, gotFile, fail);
+				window.requestFileSystem('file:///photo/'+filename, gotFile, fileNotFound);
 						
 				function gotFile(fileEntry) {
+					console.log('gotFile');
 					console.log('fileEntry.name: '+fileEntry.name);
 					console.log('fileEntry.fullPath: '+fileEntry.fullPath);
+				}
+						
+				function fileNotFound(error) {
+					alert(error.code);
 				}
 			}
 			
