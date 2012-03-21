@@ -248,7 +248,7 @@
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 					
 					function gotFS(fs) {
-						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
+						fs.root.getDirectory('photo', {create: true, exclusive: false}, gotDirEntry, fail);
 					}
 					function gotDirEntry(dirEntry) {
 						fileEntry.moveTo(dirEntry, newFilename, function (entry) {
@@ -414,16 +414,17 @@
 					}
 				}
 						
-				function fail(error) {
+/*				function fail(error) {
 					console.log(error);
 					alert(error.code);
-				}
+				}*/
 			}
 			
 			// Delete Contact
 			var deleteContact = function(cid) {
 				var list = $('#contactList');
-				var confirmDelete = confirm("Are you sure you want to delete this contact?");
+				//var confirmDelete = confirm("Are you sure you want to delete this contact?");
+				var confirmDelete = navigator.notification.confirm("Are you sure you want to delete this contact?2", "Yes", "No");
 				if (confirmDelete) {
 					console.log('Delete CID: '+cid);
 					db.transaction(function(tx) {
