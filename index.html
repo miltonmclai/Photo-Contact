@@ -231,6 +231,7 @@
 				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
 					if (imageURI.length > 0) {
+						console.log(results.insertId);
 						//saveImg(imageURI, results.insertId);
 					}
 					clearForm();
