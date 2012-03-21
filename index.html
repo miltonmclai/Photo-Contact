@@ -193,28 +193,12 @@
 			var onPhotoURISuccess = function(imageURI) {
 				// Uncomment to view the image file URI 
 				console.log(imageURI);
-				saveImg(imageURI);
-			}
-			
-			function saveImg(imageURI) {
-				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
-				
-				function gotFileEntry(fileEntry) {
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
-					
-					function gotFS(fs) {
-						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
-					}
-					function gotDirEntry(dirEntry) {
-						fileEntry.moveTo(dirEntry, fileEntry.name, function (entry) {
-							// Get image handle
-							$("#photoPreview").attr("src", entry.fullPath).show();
-							$("#photoButton").hide();
-							$("#photoBox").val(entry.fullPath);
-							console.log('Save Success: ' + entry.fullPath);
-						}, fail);
-					}
-				}
+				// Get image handle
+				$("#photoPreview").attr("src", imageURI).show();
+				$("#photoButton").hide();
+				$("#photoBox").val(imageURI);
+				$("#nameBox").val(imageURI);
+				//saveImg(imageURI);
 			}
 			
 			$('#contactForm').validate({
@@ -236,14 +220,36 @@
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
 						$('#photoBox').val()
-						], {}, onFail);
+						], onInsertContactSuccess, onFail);
 				}, onFail, onSaveContactSuccess);
+			
+				var onInsertContactSuccess = function() {
+					console.log("onInsertContactSuccess");
+				}
+				
+				var onSaveContactSuccess = function() {
+					console.log("onSaveContactSuccess");
+					$("#contactForm input").val('');
+					$('#homeMsg').html('Contact saved.');
+					$.mobile.changePage("#home");
+				}
 			}
 			
-			var onSaveContactSuccess = function() {
-				$("#contactForm input").val('');
-				$('#homeMsg').html('Contact saved.');
-				$.mobile.changePage("#home");
+			function saveImg(imageURI) {
+				window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fail);
+				
+				function gotFileEntry(fileEntry) {
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+					
+					function gotFS(fs) {
+						fs.root.getDirectory('photo', {create: true, exclusive: true}, gotDirEntry, fail);
+					}
+					function gotDirEntry(dirEntry) {
+						fileEntry.moveTo(dirEntry, fileEntry.name, function (entry) {
+							console.log('Save Success: ' + entry.fullPath);
+						}, fail);
+					}
+				}
 			}
 			
 			/*
