@@ -220,17 +220,16 @@
 						$('#emailBox').val(),
 						$('#phoneBox').val(),
 						$('#photoBox').val()
-						], {}, onFail);
-				}, onFail, onSaveContactSuccess);
-			
-				var onInsertContactSuccess = function() {
-					console.log("onInsertContactSuccess");
-				}
+						], onSaveContactSuccess, onFail);
+				}, onFail);
 				
 				var onSaveContactSuccess = function(tx, results) {
 					console.log("onSaveContactSuccess");
 					console.log(tx);
 					console.log(results);
+					console.log("Insert ID = " + results.insertId);
+					console.log("Rows Affected = " + results.rowAffected);
+					console.log("Result Set Length = " + results.rows.length);
 					$("#contactForm input").val('');
 					$('#homeMsg').html('Contact saved.');
 					$.mobile.changePage("#home");
@@ -403,13 +402,13 @@
             <input name="contactPhoto" id="photoBox" type="hidden" value="" />
             <div class="photoPreview"><img id="photoPreview" src="" /><div id="photoButton">Take a Photo</div></div>
             <div id="nameDiv" data-role="fieldcontain">
-            	<label for="contactName">Name*</label> <input type="text" name="contactName" id="nameBox" value="" />
+            	<label for="contactName">Name*</label> <input type="text" name="contactName" id="nameBox" value="Milton Lai" />
             </div>
             <div id="emailDiv" data-role="fieldcontain">
-            	<label for="contactEmail">Email*</label> <input type="text" name="contactEmail" id="emailBox" value="" />
+            	<label for="contactEmail">Email*</label> <input type="email" name="contactEmail" id="emailBox" value="m@a.b" />
             </div>
             <div id="phoneDiv" data-role="fieldcontain">
-            	<label for="contactPhone">Phone*</label> <input type="text" name="contactPhone" id="phoneBox" maxlength="8" value="" />
+            	<label for="contactPhone">Phone*</label> <input type="number" name="contactPhone" id="phoneBox" maxlength="8" value="12345678" />
             </div>
             <button type="submit" id="saveButton">Save Contact</button>
             </form>
